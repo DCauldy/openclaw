@@ -175,6 +175,7 @@ export async function monitorWebChannel(
       authDir: account.authDir,
       mediaMaxMb: account.mediaMaxMb,
       sendReadReceipts: account.sendReadReceipts,
+      debounceMs: tuning.debounceMs ?? account.debounceMs,
       onMessage: async (msg: WebInboundMsg) => {
         handledMessages += 1;
         lastMessageAt = Date.now();

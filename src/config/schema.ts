@@ -189,6 +189,7 @@ const FIELD_LABELS: Record<string, string> = {
   "channels.telegram.timeoutSeconds": "Telegram API Timeout (seconds)",
   "channels.whatsapp.dmPolicy": "WhatsApp DM Policy",
   "channels.whatsapp.selfChatMode": "WhatsApp Self-Phone Mode",
+  "channels.whatsapp.debounceMs": "WhatsApp Message Debounce (ms)",
   "channels.signal.dmPolicy": "Signal DM Policy",
   "channels.imessage.dmPolicy": "iMessage DM Policy",
   "channels.discord.dm.policy": "Discord DM Policy",
@@ -348,6 +349,8 @@ const FIELD_HELP: Record<string, string> = {
   "channels.whatsapp.dmPolicy":
     'Direct message access control ("pairing" recommended). "open" requires channels.whatsapp.allowFrom=["*"].',
   "channels.whatsapp.selfChatMode": "Same-phone setup (bot uses your personal WhatsApp number).",
+  "channels.whatsapp.debounceMs":
+    "Debounce window (ms) for batching rapid consecutive messages from the same sender (0 to disable).",
   "channels.signal.dmPolicy":
     'Direct message access control ("pairing" recommended). "open" requires channels.signal.allowFrom=["*"].',
   "channels.imessage.dmPolicy":
