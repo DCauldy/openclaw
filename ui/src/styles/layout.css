@@ -10,8 +10,10 @@
   height: 100vh;
   display: grid;
   grid-template-columns: var(--shell-nav-width) minmax(0, 1fr);
-  grid-template-rows: 1fr;
-  grid-template-areas: "nav content";
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "nav topbar"
+    "nav content";
   gap: 0;
   animation: dashboard-enter 0.4s var(--shell-focus-ease);
   transition: grid-template-columns var(--shell-focus-duration) var(--shell-focus-ease);
@@ -69,6 +71,7 @@
 
 .nav {
   grid-area: nav;
+  grid-row: 1 / -1;
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 50;
@@ -108,11 +111,12 @@
 }
 
 /* ===========================================
-   Topbar - Sticky Search Header
+   Topbar - Sticky Search Header (content column only, no overlap with sidebar)
    Matches: sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6
    =========================================== */
 
 .topbar {
+  grid-area: topbar;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -759,6 +763,8 @@
    =========================================== */
 
 .nav-backdrop {
+  grid-area: nav;
+  grid-row: 1 / -1;
   position: fixed;
   inset: 0;
   z-index: 45;
@@ -838,7 +844,10 @@
 @media (max-width: 1279px) {
   .shell {
     grid-template-columns: 1fr;
-    grid-template-areas: "content";
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "topbar"
+      "content";
   }
 
   /* Sidebar becomes a slide-out panel on mobile */
@@ -879,6 +888,12 @@
   .shell--nav-collapsed .nav,
   .nav--collapsed {
     transform: translateX(-100%);
+  }
+
+  /* Nav and backdrop are fixed overlay on mobile; keep them in content area so they don't create extra rows */
+  .nav,
+  .nav-backdrop {
+    grid-area: content;
   }
 
   .content {
