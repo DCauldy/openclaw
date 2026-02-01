@@ -229,9 +229,9 @@
   flex: 1;
 }
 
-/* Flat background - no gradient (Tailwind Plus style) */
+/* No background - transparent so it blends with content area */
 .chat-compose {
-  background: var(--bg-content, var(--bg));
+  background: transparent;
 }
 
 .chat-compose__field {
