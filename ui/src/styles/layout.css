@@ -754,6 +754,83 @@
 }
 
 /* ===========================================
+   Mobile Sidebar Backdrop
+   Matches: backdrop:bg-gray-900/80
+   =========================================== */
+
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(17, 24, 39, 0.8); /* bg-gray-900/80 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.shell:not(.shell--nav-collapsed) .nav-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (min-width: 1280px) {
+  .nav-backdrop {
+    display: none;
+  }
+}
+
+/* ===========================================
+   Mobile Close Button (in sidebar)
+   Matches: absolute top-0 left-full flex w-16 justify-center pt-5
+   =========================================== */
+
+.nav-close {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  display: flex;
+  width: 4rem; /* w-16 */
+  justify-content: center;
+  padding-top: 1.25rem; /* pt-5 */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.shell:not(.shell--nav-collapsed) .nav-close {
+  opacity: 1;
+}
+
+.nav-close button {
+  margin: -0.625rem; /* -m-2.5 */
+  padding: 0.625rem; /* p-2.5 */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  border-radius: 0.375rem;
+}
+
+.nav-close button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-close svg {
+  width: 1.5rem; /* size-6 */
+  height: 1.5rem;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (min-width: 1280px) {
+  .nav-close {
+    display: none;
+  }
+}
+
+/* ===========================================
    Responsive - Mobile & Tablet
    Below xl (1280px) - Sidebar becomes slide-out
    =========================================== */
@@ -769,11 +846,29 @@
     position: fixed;
     inset: 0 auto 0 0;
     width: 100%;
-    max-width: 20rem;
+    max-width: 20rem; /* max-w-xs */
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* Dark mode inner glow effect */
+    background: #f9fafb;
+  }
+
+  :root[data-theme="dark"] .nav {
+    background: #111827; /* dark:bg-gray-900 */
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1); /* dark:ring dark:ring-white/10 */
+  }
+
+  /* Dark mode inner overlay */
+  :root[data-theme="dark"] .nav::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1); /* dark:before:bg-black/10 */
   }
 
   /* Show nav when not collapsed */

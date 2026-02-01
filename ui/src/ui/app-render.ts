@@ -116,6 +116,15 @@ export function renderApp(state: AppViewState) {
 
   return html`
     <div class="shell ${isChat ? "shell--chat" : ""} ${chatFocus ? "shell--chat-focus" : ""} ${state.settings.navCollapsed ? "shell--nav-collapsed" : ""} ${state.onboarding ? "shell--onboarding" : ""}">
+      <!-- Mobile sidebar backdrop -->
+      <div
+        class="nav-backdrop"
+        @click=${() =>
+          state.applySettings({
+            ...state.settings,
+            navCollapsed: true,
+          })}
+      ></div>
       <header class="topbar">
         <div class="topbar-left">
           <button
@@ -150,6 +159,22 @@ export function renderApp(state: AppViewState) {
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
+        <!-- Mobile close button -->
+        <div class="nav-close">
+          <button
+            type="button"
+            @click=${() =>
+              state.applySettings({
+                ...state.settings,
+                navCollapsed: true,
+              })}
+            aria-label="Close sidebar"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
         ${TAB_GROUPS.map((group) => {
           const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
           const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
