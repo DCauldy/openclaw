@@ -175,6 +175,11 @@ export function renderApp(state: AppViewState) {
             </svg>
           </button>
         </div>
+        <!-- Sidebar brand (Tailwind Plus style) -->
+        <div class="nav-brand">
+          <img src="https://dcg-files.s3.us-east-1.amazonaws.com/logos/Icon-Derek-Caldwell-Orange.png" alt="Caldwell AI" class="nav-brand__img" />
+        </div>
+        <nav class="nav-inner">
         ${TAB_GROUPS.map((group) => {
           const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
           const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
@@ -218,6 +223,7 @@ export function renderApp(state: AppViewState) {
             </a>
           </div>
         </div>
+        </nav>
       </aside>
       <main class="content ${isChat ? "content--chat" : ""}">
         <section class="content-header">
