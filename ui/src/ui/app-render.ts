@@ -178,6 +178,10 @@ export function renderApp(state: AppViewState) {
         <!-- Sidebar brand (Tailwind Plus style) -->
         <div class="nav-brand">
           <img src="https://dcg-files.s3.us-east-1.amazonaws.com/logos/Icon-Derek-Caldwell-Orange.png" alt="Caldwell AI" class="nav-brand__img" />
+          <div class="nav-brand__text">
+            <div class="nav-brand__title">CALDWELL AI</div>
+            <div class="nav-brand__sub">Gateway Dashboard</div>
+          </div>
         </div>
         <nav class="nav-inner">
         ${TAB_GROUPS.map((group) => {

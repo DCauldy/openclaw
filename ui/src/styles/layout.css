@@ -82,8 +82,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0 1.5rem; /* px-6 */
-  background: #fff; /* bg-white */
-  border-right: 1px solid #e5e7eb; /* border-gray-200 */
+  background: var(--card); /* Use card color for consistency */
+  border-right: 1px solid var(--border);
   scrollbar-width: none;
   transition:
     width var(--shell-focus-duration) var(--shell-focus-ease),
@@ -91,37 +91,43 @@
     opacity var(--shell-focus-duration) var(--shell-focus-ease);
 }
 
-.nav::before {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  display: none;
-}
-
-:root[data-theme="dark"] .nav {
-  background: #111827; /* dark:bg-gray-900 */
-  border-right-color: rgba(255, 255, 255, 0.1); /* dark:border-white/10 */
-}
-
-:root[data-theme="dark"] .nav::before {
-  display: block;
-  background: rgba(0, 0, 0, 0.1); /* dark:before:bg-black/10 */
-}
-
-/* Sidebar brand (Caldwell icon) */
+/* Sidebar brand (Caldwell icon + text) */
 .nav-brand {
   position: relative;
   display: flex;
   height: 4rem; /* h-16 */
   flex-shrink: 0;
   align-items: center;
+  gap: 0.75rem; /* gap-x-3 */
 }
 
 .nav-brand__img {
   height: 2rem; /* h-8 */
   width: auto;
   object-fit: contain;
+}
+
+.nav-brand__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-brand__title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-strong);
+}
+
+.nav-brand__sub {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 /* Nav inner wrapper (flex-1 flex-col gap-y-7) */
@@ -903,24 +909,7 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    /* Dark mode inner glow effect */
-    background: #f9fafb;
-  }
-
-  :root[data-theme="dark"] .nav {
-    background: #1c2120; /* Caldwell dark grey */
-    box-shadow:
-      0 25px 50px -12px rgba(0, 0, 0, 0.25),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1); /* dark:ring dark:ring-white/10 */
-  }
-
-  /* Dark mode inner overlay */
-  :root[data-theme="dark"] .nav::before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.1); /* dark:before:bg-black/10 */
+    background: var(--card); /* Use card color */
   }
 
   /* Show nav when not collapsed */
