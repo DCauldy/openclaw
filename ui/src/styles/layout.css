@@ -20,7 +20,7 @@
 }
 
 :root[data-theme="dark"] .shell {
-  background: #111827; /* gray-900 */
+  background: #1c2120; /* Caldwell dark grey */
 }
 
 @supports (height: 100dvh) {
@@ -140,7 +140,7 @@
 }
 
 :root[data-theme="dark"] .topbar {
-  background: #111827; /* dark:bg-gray-900 */
+  background: #1c2120; /* Caldwell dark grey */
   border-bottom-color: rgba(255, 255, 255, 0.05); /* dark:border-white/5 */
   box-shadow: none; /* dark:shadow-none */
 }
@@ -575,7 +575,7 @@
 }
 
 :root[data-theme="dark"] .content {
-  background: #111827; /* dark:bg-gray-900 */
+  background: #1c2120; /* Caldwell dark grey */
 }
 
 .shell--nav-collapsed .content,
@@ -616,7 +616,7 @@
 }
 
 :root[data-theme="dark"] .content-header {
-  background: #111827;
+  background: #1c2120; /* Caldwell dark grey */
   border-bottom-color: rgba(255, 255, 255, 0.05); /* dark:border-white/5 */
 }
 
@@ -755,14 +755,14 @@
 
 /* ===========================================
    Mobile Sidebar Backdrop
-   Matches: backdrop:bg-gray-900/80
+   Uses Caldwell dark grey (#1c2120) with 80% opacity
    =========================================== */
 
 .nav-backdrop {
   position: fixed;
   inset: 0;
   z-index: 45;
-  background: rgba(17, 24, 39, 0.8); /* bg-gray-900/80 */
+  background: rgba(28, 33, 32, 0.8); /* Caldwell dark grey/80 */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease-in-out;
@@ -856,7 +856,7 @@
   }
 
   :root[data-theme="dark"] .nav {
-    background: #111827; /* dark:bg-gray-900 */
+    background: #1c2120; /* Caldwell dark grey */
     box-shadow:
       0 25px 50px -12px rgba(0, 0, 0, 0.25),
       inset 0 0 0 1px rgba(255, 255, 255, 0.1); /* dark:ring dark:ring-white/10 */
