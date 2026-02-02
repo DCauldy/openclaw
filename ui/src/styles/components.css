@@ -258,7 +258,7 @@
 }
 
 /* ===========================================
-   Sidebar Status Section
+   Sidebar Status Section (Theme Toggle)
    =========================================== */
 
 .nav-group--status {
@@ -272,25 +272,6 @@
   flex-direction: column;
   gap: 12px;
   padding-top: 16px;
-}
-
-.nav-status__health {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8125rem; /* 13px */
-  color: var(--text);
-}
-
-.nav-status__label {
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.nav-status__value {
-  font-family: var(--mono);
-  font-size: 0.75rem; /* 12px */
-  font-weight: 500;
 }
 
 .nav-status__theme {

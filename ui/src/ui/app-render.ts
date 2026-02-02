@@ -149,6 +149,13 @@ export function renderApp(state: AppViewState) {
             </div>
           </div>
         </div>
+        <div class="topbar-status">
+          <div class="pill">
+            <span class="statusDot ${state.connected ? "ok" : ""}"></span>
+            <span>Health</span>
+            <span class="mono">${state.connected ? "OK" : "Offline"}</span>
+          </div>
+        </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
         <!-- Mobile close button -->
@@ -202,14 +209,9 @@ export function renderApp(state: AppViewState) {
             </div>
           `;
         })}
-        <!-- Health Status and Theme Toggle -->
+        <!-- Theme Toggle -->
         <div class="nav-group nav-group--status">
           <div class="nav-status">
-            <div class="nav-status__health">
-              <span class="statusDot ${state.connected ? "ok" : ""}"></span>
-              <span class="nav-status__label">Health</span>
-              <span class="nav-status__value">${state.connected ? "OK" : "Offline"}</span>
-            </div>
             <div class="nav-status__theme">
               ${renderThemeToggle(state)}
             </div>
