@@ -149,14 +149,6 @@ export function renderApp(state: AppViewState) {
             </div>
           </div>
         </div>
-        <div class="topbar-status">
-          <div class="pill">
-            <span class="statusDot ${state.connected ? "ok" : ""}"></span>
-            <span>Health</span>
-            <span class="mono">${state.connected ? "OK" : "Offline"}</span>
-          </div>
-          ${renderThemeToggle(state)}
-        </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
         <!-- Mobile close button -->
@@ -210,21 +202,17 @@ export function renderApp(state: AppViewState) {
             </div>
           `;
         })}
-        <div class="nav-group nav-group--links">
-          <div class="nav-label nav-label--static">
-            <span class="nav-label__text">Resources</span>
-          </div>
-          <div class="nav-group__items">
-            <a
-              class="nav-item nav-item--external"
-              href="https://docs.openclaw.ai"
-              target="_blank"
-              rel="noreferrer"
-              title="Docs (opens in new tab)"
-            >
-              <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
-              <span class="nav-item__text">Docs</span>
-            </a>
+        <!-- Health Status and Theme Toggle -->
+        <div class="nav-group nav-group--status">
+          <div class="nav-status">
+            <div class="nav-status__health">
+              <span class="statusDot ${state.connected ? "ok" : ""}"></span>
+              <span class="nav-status__label">Health</span>
+              <span class="nav-status__value">${state.connected ? "OK" : "Offline"}</span>
+            </div>
+            <div class="nav-status__theme">
+              ${renderThemeToggle(state)}
+            </div>
           </div>
         </div>
         </nav>
