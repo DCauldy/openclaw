@@ -100,7 +100,7 @@
   stroke-linejoin: round;
 }
 
-/* Chat compose - sticky at bottom */
+/* Chat compose - sticky at bottom, no gradient */
 .chat-compose {
   position: sticky;
   bottom: 0;
@@ -110,7 +110,7 @@
   gap: 12px;
   margin-top: auto; /* Push to bottom of flex container */
   padding: 12px 4px 4px;
-  background: linear-gradient(to bottom, transparent, var(--bg) 20%);
+  background: transparent;
   z-index: 10;
 }
 

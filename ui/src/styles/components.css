@@ -1725,7 +1725,7 @@
   z-index: 5;
   margin-top: 0;
   padding-top: 12px;
-  background: linear-gradient(180deg, transparent 0%, var(--bg) 40%);
+  background: transparent;
 }
 
 .shell--chat-focus .chat-compose {
