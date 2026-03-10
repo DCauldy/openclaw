@@ -139,6 +139,15 @@ export function renderApp(state: AppViewState) {
           >
             <span class="nav-collapse-toggle__icon">${icons.menu}</span>
           </button>
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="https://dcg-files.s3.us-east-1.amazonaws.com/logos/Icon-Derek-Caldwell-Orange.png" alt="Caldwell AI" />
+            </div>
+            <div class="brand-text">
+              <div class="brand-title">CALDWELL AI</div>
+              <div class="brand-sub">Gateway Dashboard</div>
+            </div>
+          </div>
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">

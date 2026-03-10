@@ -939,9 +939,14 @@
 }
 
 @media (min-width: 1280px) {
-  /* xl and above - Fixed sidebar, hide toggle */
-  .topbar .nav-collapse-toggle {
+  /* xl and above - Fixed sidebar, no topbar needed */
+  .topbar {
     display: none;
+  }
+
+  .shell {
+    grid-template-rows: 1fr;
+    grid-template-areas: "nav content";
   }
 
   .nav {
