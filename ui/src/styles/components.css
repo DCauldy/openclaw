@@ -269,9 +269,22 @@
 
 .nav-status {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding-top: 16px;
+}
+
+.nav-status__health {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav-status__health .pill {
+  font-size: 11px;
+  padding: 3px 8px;
 }
 
 .nav-status__theme {

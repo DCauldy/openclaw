@@ -139,22 +139,6 @@ export function renderApp(state: AppViewState) {
           >
             <span class="nav-collapse-toggle__icon">${icons.menu}</span>
           </button>
-          <div class="brand">
-            <div class="brand-logo">
-              <img src="https://dcg-files.s3.us-east-1.amazonaws.com/logos/Icon-Derek-Caldwell-Orange.png" alt="Caldwell AI" />
-            </div>
-            <div class="brand-text">
-              <div class="brand-title">CALDWELL AI</div>
-              <div class="brand-sub">Gateway Dashboard</div>
-            </div>
-          </div>
-        </div>
-        <div class="topbar-status">
-          <div class="pill">
-            <span class="statusDot ${state.connected ? "ok" : ""}"></span>
-            <span>Health</span>
-            <span class="mono">${state.connected ? "OK" : "Offline"}</span>
-          </div>
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
@@ -209,9 +193,16 @@ export function renderApp(state: AppViewState) {
             </div>
           `;
         })}
-        <!-- Theme Toggle -->
+        <!-- Theme Toggle + Health -->
         <div class="nav-group nav-group--status">
           <div class="nav-status">
+            <div class="nav-status__health">
+              <div class="pill">
+                <span class="statusDot ${state.connected ? "ok" : ""}"></span>
+                <span>Health</span>
+                <span class="mono">${state.connected ? "OK" : "Offline"}</span>
+              </div>
+            </div>
             <div class="nav-status__theme">
               ${renderThemeToggle(state)}
             </div>
