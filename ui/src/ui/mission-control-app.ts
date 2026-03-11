@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { ref, createRef } from "lit/directives/ref.js";
 import type { GatewayHelloOk } from "./gateway";
 import { GatewayBrowserClient } from "./gateway";
 import { loadSettings } from "./storage";
@@ -12,6 +13,8 @@ import type {
   TaskStatus,
 } from "./types";
 import { formatAgo, formatDurationMs } from "./format";
+import { extractText } from "./chat/message-extract";
+import { generateUUID } from "./uuid";
 import { DIRECTORS } from "./controllers/board";
 
 // ---- module-level form state (uncontrolled inputs) ----
@@ -129,6 +132,16 @@ export class MissionControlApp extends LitElement {
   @state() private loading = true;
   @state() private dispatchingTaskIds = new Set<string>();
   @state() private dispatchedTaskIds = new Set<string>();
+
+  // ---- embedded chat ----
+  @state() private selectedDirectorId: string | null = null;
+  @state() private directorMessages: unknown[] = [];
+  @state() private directorChatLoading = false;
+  @state() private directorChatSending = false;
+  @state() private directorChatDraft = "";
+  @state() private directorChatError: string | null = null;
+
+  private chatScrollRef = createRef<HTMLDivElement>();
 
   private client: GatewayBrowserClient | null = null;
 
@@ -315,6 +328,76 @@ export class MissionControlApp extends LitElement {
     }
   }
 
+  // ---- embedded chat ----
+
+  private async selectDirector(id: string) {
+    if (this.selectedDirectorId === id) {
+      // Deselect on second click
+      this.selectedDirectorId = null;
+      this.directorMessages = [];
+      return;
+    }
+    this.selectedDirectorId = id;
+    this.directorMessages = [];
+    this.directorChatDraft = "";
+    this.directorChatError = null;
+    await this.loadDirectorHistory(id);
+  }
+
+  private async loadDirectorHistory(id: string) {
+    if (!this.client) return;
+    this.directorChatLoading = true;
+    try {
+      const res = await this.client.request<{ messages?: unknown[] }>("chat.history", {
+        sessionKey: `agent:${id}:main`,
+        limit: 100,
+      });
+      this.directorMessages = Array.isArray(res?.messages) ? res.messages : [];
+      this.scrollChatToBottom();
+    } catch (err) {
+      this.directorChatError = String(err);
+    } finally {
+      this.directorChatLoading = false;
+    }
+  }
+
+  private scrollChatToBottom() {
+    // Schedule after render
+    void Promise.resolve().then(() => {
+      const el = this.chatScrollRef.value;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
+  }
+
+  private async sendDirectorMessage() {
+    const id = this.selectedDirectorId;
+    if (!id || !this.client || !this.directorChatDraft.trim()) return;
+    const message = this.directorChatDraft.trim();
+    this.directorChatDraft = "";
+    // Optimistically add user message
+    this.directorMessages = [
+      ...this.directorMessages,
+      { role: "user", content: [{ type: "text", text: message }], timestamp: Date.now() },
+    ];
+    this.scrollChatToBottom();
+    this.directorChatSending = true;
+    this.directorChatError = null;
+    try {
+      await this.client.request("chat.send", {
+        sessionKey: `agent:${id}:main`,
+        message,
+        idempotencyKey: generateUUID(),
+        deliver: true,
+      });
+      // Reload history to get the assistant response
+      await this.loadDirectorHistory(id);
+    } catch (err) {
+      this.directorChatError = `Send failed: ${String(err)}`;
+    } finally {
+      this.directorChatSending = false;
+    }
+  }
+
   // ---- rendering ----
 
   private renderKpiRow() {
@@ -360,53 +443,141 @@ export class MissionControlApp extends LitElement {
     const sessions = this.sessionsResult?.sessions ?? [];
     const agentIds = new Set((this.agentsList?.agents ?? []).map((a) => a.id));
     const missingCount = DIRECTORS.filter((d) => !agentIds.has(d.id)).length;
+    const selectedDir = this.selectedDirectorId
+      ? DIRECTORS.find((d) => d.id === this.selectedDirectorId)
+      : null;
 
     return html`
-      <div class="card" style="margin-top: 18px;">
-        <div class="card-header-row">
-          <div>
-            <div class="card-title">Board of Directors</div>
-            <div class="card-sub">Your named AI agents and their current status.</div>
+      <div class="card director-section ${this.selectedDirectorId ? "director-section--split" : ""}" style="margin-top: 18px;">
+        <div class="director-section__left">
+          <div class="card-header-row">
+            <div>
+              <div class="card-title">Board of Directors</div>
+              <div class="card-sub">Click a director to chat.</div>
+            </div>
+            ${
+              missingCount > 0
+                ? html`<button
+                    class="btn btn--sm primary"
+                    @click=${() => void this.initDirectors()}
+                  >Initialize (${missingCount} missing)</button>`
+                : nothing
+            }
           </div>
-          ${
-            missingCount > 0
-              ? html`<button
-                  class="btn btn--sm primary"
-                  @click=${() => void this.initDirectors()}
-                  title="Add ${missingCount} missing director agent${missingCount !== 1 ? "s" : ""} to config"
+          <div class="director-grid">
+            ${DIRECTORS.map((d) => {
+              const present = agentIds.has(d.id);
+              const status: DirectorStatus = present ? directorStatus(d.id, sessions) : "offline";
+              const lastActive = present ? directorLastActivity(d.id, sessions) : null;
+              const tokens = present ? directorTokens(d.id, sessions) : null;
+              const isSelected = this.selectedDirectorId === d.id;
+              return html`
+                <div
+                  class="director-card ${!present ? "director-card--missing" : ""} ${isSelected ? "director-card--selected" : ""}"
+                  role="button"
+                  tabindex="0"
+                  @click=${() => void this.selectDirector(d.id)}
+                  @keydown=${(e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") void this.selectDirector(d.id); }}
                 >
-                  Initialize Board (${missingCount} missing)
-                </button>`
-              : nothing
-          }
-        </div>
-        <div class="director-grid">
-          ${DIRECTORS.map((d) => {
-            const present = agentIds.has(d.id);
-            const status: DirectorStatus = present ? directorStatus(d.id, sessions) : "offline";
-            const lastActive = present ? directorLastActivity(d.id, sessions) : null;
-            const tokens = present ? directorTokens(d.id, sessions) : null;
-            return html`
-              <div class="director-card ${!present ? "director-card--missing" : ""}">
-                <div class="director-card__emoji">${d.emoji}</div>
-                <div class="director-card__info">
-                  <div class="director-card__name">${d.name}</div>
-                  <div class="director-card__status">
-                    <span class="${dotClass(status)}"></span>
-                    <span class="${pillClass(status)}" style="font-size: 10px; padding: 1px 6px;">${statusLabel(status)}</span>
+                  <div class="director-card__emoji">${d.emoji}</div>
+                  <div class="director-card__info">
+                    <div class="director-card__name">${d.name}</div>
+                    <div class="director-card__status">
+                      <span class="${dotClass(status)}"></span>
+                      <span class="${pillClass(status)}" style="font-size: 10px; padding: 1px 6px;">${statusLabel(status)}</span>
+                    </div>
+                  </div>
+                  <div class="director-card__meta">
+                    ${lastActive ? html`<div class="muted" style="font-size: 10px;">Last: ${lastActive}</div>` : nothing}
+                    ${tokens ? html`<div class="muted" style="font-size: 10px;">${tokens.toLocaleString()} tok</div>` : nothing}
+                    ${!present ? html`<div class="muted" style="font-size: 10px; color: var(--danger);">Not configured</div>` : nothing}
                   </div>
                 </div>
-                <div class="director-card__meta">
-                  ${lastActive ? html`<div class="muted" style="font-size: 10px;">Last: ${lastActive}</div>` : nothing}
-                  ${tokens ? html`<div class="muted" style="font-size: 10px;">${tokens.toLocaleString()} tok</div>` : nothing}
-                  ${!present ? html`<div class="muted" style="font-size: 10px; color: var(--danger);">Not configured</div>` : nothing}
-                </div>
-              </div>
-            `;
-          })}
+              `;
+            })}
+          </div>
         </div>
+
+        ${selectedDir
+          ? html`
+              <div class="director-chat-panel">
+                <div class="director-chat-panel__header">
+                  <span class="director-chat-panel__emoji">${selectedDir.emoji}</span>
+                  <div>
+                    <div class="director-chat-panel__name">${selectedDir.name}</div>
+                    <div class="muted" style="font-size: 10px;">agent:${selectedDir.id}:main</div>
+                  </div>
+                  <button
+                    class="btn btn--sm"
+                    @click=${() => void this.loadDirectorHistory(selectedDir.id)}
+                    title="Refresh chat history"
+                    style="margin-left: auto;"
+                  >↻</button>
+                  <button
+                    class="director-chat-panel__close"
+                    @click=${() => { this.selectedDirectorId = null; this.directorMessages = []; }}
+                    title="Close"
+                  >×</button>
+                </div>
+
+                <div class="director-chat-messages" ${ref(this.chatScrollRef)}>
+                  ${this.directorChatLoading
+                    ? html`<div class="director-chat-empty">Loading…</div>`
+                    : this.directorMessages.length === 0
+                      ? html`<div class="director-chat-empty">No messages yet. Say hello!</div>`
+                      : this.renderChatMessages()}
+                </div>
+
+                ${this.directorChatError
+                  ? html`<div class="director-chat-error">${this.directorChatError}</div>`
+                  : nothing}
+
+                <form
+                  class="director-chat-input-row"
+                  @submit=${(e: Event) => { e.preventDefault(); void this.sendDirectorMessage(); }}
+                >
+                  <textarea
+                    class="director-chat-textarea"
+                    placeholder="Message ${selectedDir.name}…"
+                    .value=${this.directorChatDraft}
+                    ?disabled=${this.directorChatSending}
+                    rows="2"
+                    @input=${(e: Event) => { this.directorChatDraft = (e.target as HTMLTextAreaElement).value; }}
+                    @keydown=${(e: KeyboardEvent) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        void this.sendDirectorMessage();
+                      }
+                    }}
+                  ></textarea>
+                  <button
+                    type="submit"
+                    class="btn primary director-chat-send-btn"
+                    ?disabled=${this.directorChatSending || !this.directorChatDraft.trim()}
+                  >${this.directorChatSending ? "…" : "Send"}</button>
+                </form>
+              </div>
+            `
+          : nothing}
       </div>
     `;
+  }
+
+  private renderChatMessages() {
+    // Filter to user+assistant only, skip tool messages
+    const visible = (this.directorMessages as Array<{ role?: string }>).filter(
+      (m) => m.role === "user" || m.role === "assistant",
+    );
+    return visible.map((msg) => {
+      const role = (msg as { role?: string }).role ?? "";
+      const text = extractText(msg) ?? "";
+      if (!text) return nothing;
+      return html`
+        <div class="director-chat-msg director-chat-msg--${role}">
+          <div class="director-chat-msg__bubble">${text}</div>
+        </div>
+      `;
+    });
   }
 
   private renderKanban() {
