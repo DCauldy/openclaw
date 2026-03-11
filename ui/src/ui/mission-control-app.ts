@@ -1,6 +1,7 @@
 import { LitElement, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { ref, createRef } from "lit/directives/ref.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import type { GatewayHelloOk } from "./gateway";
 import { GatewayBrowserClient } from "./gateway";
 import { loadSettings } from "./storage";
@@ -14,6 +15,7 @@ import type {
 } from "./types";
 import { formatAgo, formatDurationMs } from "./format";
 import { extractText } from "./chat/message-extract";
+import { toSanitizedMarkdownHtml } from "./markdown";
 import { generateUUID } from "./uuid";
 import { DIRECTORS } from "./controllers/board";
 
@@ -164,6 +166,16 @@ export class MissionControlApp extends LitElement {
         if (info.code !== 1000 && info.code !== 4008) {
           this.lastError = `Disconnected (${info.code})`;
         }
+      },
+      onEvent: (evt) => {
+        if (evt.event !== "chat") return;
+        const payload = evt.payload as { sessionKey?: string; state?: string } | undefined;
+        const evtState = payload?.state;
+        if (evtState !== "final" && evtState !== "aborted" && evtState !== "error") return;
+        const id = this.selectedDirectorId;
+        if (!id) return;
+        if (payload?.sessionKey !== `agent:${id}:main`) return;
+        void this.loadDirectorHistory(id);
       },
     });
     this.client.start();
@@ -574,7 +586,7 @@ export class MissionControlApp extends LitElement {
       if (!text) return nothing;
       return html`
         <div class="director-chat-msg director-chat-msg--${role}">
-          <div class="director-chat-msg__bubble">${text}</div>
+          <div class="director-chat-msg__bubble director-chat-msg__bubble--md chat-text">${unsafeHTML(toSanitizedMarkdownHtml(text))}</div>
         </div>
       `;
     });

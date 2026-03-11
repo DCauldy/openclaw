@@ -2846,6 +2846,11 @@ mission-control-app {
   word-break: break-word;
 }
 
+.director-chat-msg__bubble--md {
+  white-space: normal;
+  font-size: 12px;
+}
+
 .director-chat-msg--user .director-chat-msg__bubble {
   background: rgba(34, 211, 165, 0.15);
   border: 1px solid rgba(34, 211, 165, 0.25);
