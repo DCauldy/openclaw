@@ -130,7 +130,7 @@ export function iconForTab(tab: Tab): IconName {
 export function titleForTab(tab: Tab) {
   switch (tab) {
     case "overview":
-      return "Dashboard";
+      return "Mission Control";
     case "channels":
       return "Channels";
     case "instances":
@@ -159,7 +159,7 @@ export function titleForTab(tab: Tab) {
 export function subtitleForTab(tab: Tab) {
   switch (tab) {
     case "overview":
-      return "Real-time mission control — health, cost, channels, and n8n failures.";
+      return "Your AI board of directors and task command center.";
     case "channels":
       return "Manage channels and settings.";
     case "instances":

@@ -9,6 +9,7 @@ import type { Tab } from "./navigation";
 import type { ResolvedTheme, ThemeMode } from "./theme";
 import type {
   AgentsListResult,
+  BoardTask,
   ConfigSnapshot,
   ConfigUiHints,
   CronJob,
@@ -72,6 +73,7 @@ import {
 } from "./app-tool-stream";
 import { resolveInjectedAssistantIdentity } from "./assistant-identity";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity";
+import { loadBoardTasks as loadBoardTasksInternal } from "./controllers/board";
 import { loadDashboardData as loadDashboardDataInternal } from "./controllers/dashboard";
 import { loadSettings, type UiSettings } from "./storage";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types";
@@ -231,6 +233,8 @@ export class OpenClawApp extends LitElement {
   @state() dashboardCostToday: number | null = null;
   @state() dashboardN8nFailures: import("./types").N8nFailureSummary | null = null;
   @state() dashboardLastRefresh: number | null = null;
+  @state() boardTasks: BoardTask[] | null = null;
+  @state() boardTasksLoading = false;
 
   @state() logsLoading = false;
   @state() logsError: string | null = null;
@@ -343,6 +347,12 @@ export class OpenClawApp extends LitElement {
   async loadDashboard() {
     await loadDashboardDataInternal(
       this as unknown as Parameters<typeof loadDashboardDataInternal>[0],
+    );
+  }
+
+  async loadBoardTasks() {
+    await loadBoardTasksInternal(
+      this as unknown as Parameters<typeof loadBoardTasksInternal>[0],
     );
   }
 

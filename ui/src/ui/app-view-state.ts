@@ -10,6 +10,7 @@ import type { ThemeMode } from "./theme";
 import type { ThemeTransitionContext } from "./theme-transition";
 import type {
   AgentsListResult,
+  BoardTask,
   ChannelsStatusSnapshot,
   ConfigSnapshot,
   CronJob,
@@ -139,6 +140,8 @@ export type AppViewState = {
   dashboardCostToday: number | null;
   dashboardN8nFailures: N8nFailureSummary | null;
   dashboardLastRefresh: number | null;
+  boardTasks: BoardTask[] | null;
+  boardTasksLoading: boolean;
   logsLoading: boolean;
   logsError: string | null;
   logsFile: string | null;
@@ -151,6 +154,7 @@ export type AppViewState = {
   connect: () => void;
   setTab: (tab: Tab) => void;
   loadDashboard: () => Promise<void>;
+  loadBoardTasks: () => Promise<void>;
   setTheme: (theme: ThemeMode, context?: ThemeTransitionContext) => void;
   applySettings: (next: UiSettings) => void;
   loadOverview: () => Promise<void>;

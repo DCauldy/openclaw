@@ -22,6 +22,12 @@ import type { ChatQueueItem, CronFormState } from "./ui-types";
 import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
 import { refreshChatAvatar } from "./app-chat";
 import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers";
+import {
+  createBoardTask,
+  deleteBoardTask,
+  initializeDirectors,
+  updateBoardTask,
+} from "./controllers/board";
 import { loadChannels } from "./controllers/channels";
 import { loadChatHistory } from "./controllers/chat";
 import {
@@ -238,13 +244,23 @@ export function renderApp(state: AppViewState) {
                 hello: state.hello,
                 presenceEntries: state.presenceEntries,
                 sessionsResult: state.sessionsResult,
+                agentsList: state.agentsList,
                 channelsSnapshot: state.channelsSnapshot,
                 cronJobs: state.cronJobs,
                 cronStatus: state.cronStatus,
                 costToday: state.dashboardCostToday,
                 n8nFailures: state.dashboardN8nFailures,
                 lastRefresh: state.dashboardLastRefresh,
+                boardTasks: state.boardTasks,
+                boardTasksLoading: state.boardTasksLoading,
                 onRefresh: () => state.loadDashboard(),
+                onTaskCreate: (params) => void createBoardTask(state, params),
+                onTaskUpdate: (id, patch) => void updateBoardTask(state, id, patch),
+                onTaskDelete: (id) => void deleteBoardTask(state, id),
+                onInitDirectors: () => void initializeDirectors(state),
+                onBoardStateChange: () => {
+                  state.boardTasks = state.boardTasks ? [...state.boardTasks] : [];
+                },
               })
             : nothing
         }
