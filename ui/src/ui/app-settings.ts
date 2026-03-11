@@ -1,6 +1,8 @@
 import type { OpenClawApp } from "./app";
 import { refreshChat } from "./app-chat";
 import {
+  startDashboardPolling,
+  stopDashboardPolling,
   startLogsPolling,
   stopLogsPolling,
   startDebugPolling,
@@ -8,6 +10,7 @@ import {
 } from "./app-polling";
 import { scheduleChatScroll, scheduleLogsScroll } from "./app-scroll";
 import { loadChannels } from "./controllers/channels";
+import { loadDashboardData } from "./controllers/dashboard";
 import { loadConfig, loadConfigSchema } from "./controllers/config";
 import { loadCronJobs, loadCronStatus } from "./controllers/cron";
 import { loadDebug } from "./controllers/debug";
@@ -131,6 +134,9 @@ export function setTab(host: SettingsHost, next: Tab) {
   if (next === "debug")
     startDebugPolling(host as unknown as Parameters<typeof startDebugPolling>[0]);
   else stopDebugPolling(host as unknown as Parameters<typeof stopDebugPolling>[0]);
+  if (next === "overview")
+    startDashboardPolling(host as unknown as Parameters<typeof startDashboardPolling>[0]);
+  else stopDashboardPolling(host as unknown as Parameters<typeof stopDashboardPolling>[0]);
   void refreshActiveTab(host);
   syncUrlWithTab(host, next, false);
 }
@@ -312,6 +318,7 @@ export async function loadOverview(host: SettingsHost) {
     loadSessions(host as unknown as OpenClawApp),
     loadCronStatus(host as unknown as OpenClawApp),
     loadDebug(host as unknown as OpenClawApp),
+    loadDashboardData(host as unknown as OpenClawApp),
   ]);
 }
 

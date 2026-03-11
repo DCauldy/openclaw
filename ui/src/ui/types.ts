@@ -514,6 +514,20 @@ export type StatusSummary = Record<string, unknown>;
 
 export type HealthSnapshot = Record<string, unknown>;
 
+export type N8nFailureRecord = {
+  id: string;
+  name: string;
+  resolution: string;
+  rootCause: string;
+  createdAt: string;
+};
+
+export type N8nFailureSummary = {
+  count: number;
+  unresolved: number;
+  recent: N8nFailureRecord[];
+};
+
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 
 export type LogEntry = {

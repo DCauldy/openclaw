@@ -18,6 +18,7 @@ import type {
   HealthSnapshot,
   LogEntry,
   LogLevel,
+  N8nFailureSummary,
   NostrProfile,
   PresenceEntry,
   SessionsListResult,
@@ -135,6 +136,9 @@ export type AppViewState = {
   debugCallParams: string;
   debugCallResult: string | null;
   debugCallError: string | null;
+  dashboardCostToday: number | null;
+  dashboardN8nFailures: N8nFailureSummary | null;
+  dashboardLastRefresh: number | null;
   logsLoading: boolean;
   logsError: string | null;
   logsFile: string | null;
@@ -146,6 +150,7 @@ export type AppViewState = {
   client: GatewayBrowserClient | null;
   connect: () => void;
   setTab: (tab: Tab) => void;
+  loadDashboard: () => Promise<void>;
   setTheme: (theme: ThemeMode, context?: ThemeTransitionContext) => void;
   applySettings: (next: UiSettings) => void;
   loadOverview: () => Promise<void>;

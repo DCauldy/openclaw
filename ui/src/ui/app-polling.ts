@@ -1,4 +1,5 @@
 import type { OpenClawApp } from "./app";
+import { loadDashboardData } from "./controllers/dashboard";
 import { loadDebug } from "./controllers/debug";
 import { loadLogs } from "./controllers/logs";
 import { loadNodes } from "./controllers/nodes";
@@ -7,6 +8,7 @@ type PollingHost = {
   nodesPollInterval: number | null;
   logsPollInterval: number | null;
   debugPollInterval: number | null;
+  dashboardPollInterval: number | null;
   tab: string;
 };
 
@@ -50,4 +52,18 @@ export function stopDebugPolling(host: PollingHost) {
   if (host.debugPollInterval == null) return;
   clearInterval(host.debugPollInterval);
   host.debugPollInterval = null;
+}
+
+export function startDashboardPolling(host: PollingHost) {
+  if (host.dashboardPollInterval != null) return;
+  host.dashboardPollInterval = window.setInterval(() => {
+    if (host.tab !== "overview") return;
+    void loadDashboardData(host as unknown as OpenClawApp);
+  }, 30_000);
+}
+
+export function stopDashboardPolling(host: PollingHost) {
+  if (host.dashboardPollInterval == null) return;
+  clearInterval(host.dashboardPollInterval);
+  host.dashboardPollInterval = null;
 }

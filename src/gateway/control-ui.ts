@@ -12,6 +12,8 @@ import {
 } from "./control-ui-shared.js";
 
 const ROOT_PREFIX = "/";
+const AIRTABLE_BASE_ID = "app4XCPstGX975ZgK";
+const AIRTABLE_TABLE_ID = "tblvZA42h4H3cjnwN";
 
 export type ControlUiRequestOptions = {
   basePath?: string;
@@ -349,4 +351,93 @@ export function handleControlUiHttpRequest(
 
   respondNotFound(res);
   return true;
+}
+
+type AirtableRecord = {
+  id: string;
+  fields: Record<string, unknown>;
+  createdTime?: string;
+};
+
+type AirtableListResponse = {
+  records?: AirtableRecord[];
+  error?: { type?: string; message?: string };
+};
+
+/**
+ * Handles internal API endpoints for the Control UI dashboard.
+ * Currently serves: GET /api/dashboard/n8n-failures (proxies Airtable)
+ */
+export async function handleControlUiApiRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  opts?: { basePath?: string },
+): Promise<boolean> {
+  if (req.method !== "GET" && req.method !== "HEAD") return false;
+
+  const urlRaw = req.url;
+  if (!urlRaw) return false;
+
+  const url = new URL(urlRaw, "http://localhost");
+  const basePath = normalizeControlUiBasePath(opts?.basePath);
+  const pathname = url.pathname;
+
+  // Resolve the API path relative to basePath
+  const apiPrefix = basePath ? `${basePath}/api/` : `/api/`;
+  if (!pathname.startsWith(apiPrefix)) return false;
+
+  const apiPath = pathname.slice(apiPrefix.length - 1); // starts with /
+
+  if (apiPath === "/dashboard/n8n-failures") {
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    if (!apiKey) {
+      sendJson(res, 503, { error: "AIRTABLE_API_KEY not configured on gateway" });
+      return true;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        maxRecords: "10",
+        "sort[0][field]": "Timestamp",
+        "sort[0][direction]": "desc",
+      });
+      const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}?${params.toString()}`;
+      const airtableRes = await fetch(airtableUrl, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      if (!airtableRes.ok) {
+        sendJson(res, airtableRes.status, { error: `Airtable returned ${airtableRes.status}` });
+        return true;
+      }
+
+      const data = (await airtableRes.json()) as AirtableListResponse;
+      const records = data.records ?? [];
+
+      const recent = records.map((r) => ({
+        id: r.id,
+        name: String(r.fields["Workflow Name"] ?? r.id),
+        resolution: String(r.fields["Resolution"] ?? "pending"),
+        rootCause: String(r.fields["Root Cause"] ?? ""),
+        createdAt: r.createdTime ?? "",
+      }));
+
+      const unresolved = recent.filter(
+        (r) => r.resolution === "pending" || r.resolution === "escalated",
+      ).length;
+
+      sendJson(res, 200, {
+        count: records.length,
+        unresolved,
+        recent,
+      });
+    } catch (err) {
+      sendJson(res, 500, { error: String(err) });
+    }
+    return true;
+  }
+
+  return false;
 }

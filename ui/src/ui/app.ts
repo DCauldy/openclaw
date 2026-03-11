@@ -72,6 +72,7 @@ import {
 } from "./app-tool-stream";
 import { resolveInjectedAssistantIdentity } from "./assistant-identity";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity";
+import { loadDashboardData as loadDashboardDataInternal } from "./controllers/dashboard";
 import { loadSettings, type UiSettings } from "./storage";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types";
 
@@ -227,6 +228,10 @@ export class OpenClawApp extends LitElement {
   @state() debugCallResult: string | null = null;
   @state() debugCallError: string | null = null;
 
+  @state() dashboardCostToday: number | null = null;
+  @state() dashboardN8nFailures: import("./types").N8nFailureSummary | null = null;
+  @state() dashboardLastRefresh: number | null = null;
+
   @state() logsLoading = false;
   @state() logsError: string | null = null;
   @state() logsFile: string | null = null;
@@ -251,6 +256,7 @@ export class OpenClawApp extends LitElement {
   private nodesPollInterval: number | null = null;
   private logsPollInterval: number | null = null;
   private debugPollInterval: number | null = null;
+  private dashboardPollInterval: number | null = null;
   private logsScrollFrame: number | null = null;
   private toolStreamById = new Map<string, ToolStreamEntry>();
   private toolStreamOrder: string[] = [];
@@ -332,6 +338,12 @@ export class OpenClawApp extends LitElement {
 
   async loadOverview() {
     await loadOverviewInternal(this as unknown as Parameters<typeof loadOverviewInternal>[0]);
+  }
+
+  async loadDashboard() {
+    await loadDashboardDataInternal(
+      this as unknown as Parameters<typeof loadDashboardDataInternal>[0],
+    );
   }
 
   async loadCron() {

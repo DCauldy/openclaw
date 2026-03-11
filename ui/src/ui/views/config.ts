@@ -1,5 +1,6 @@
 import { html, nothing } from "lit";
 import type { ConfigUiHints } from "../types";
+import type { UiSettings } from "../storage";
 import { analyzeConfigSchema, renderConfigForm, SECTION_META } from "./config-form";
 import { hintForPath, humanize, schemaType, type JsonSchema } from "./config-form.shared";
 
@@ -22,6 +23,14 @@ export type ConfigProps = {
   searchQuery: string;
   activeSection: string | null;
   activeSubsection: string | null;
+  // Gateway Access (connection settings) — optional so legacy callers still work
+  settings?: UiSettings;
+  password?: string;
+  onSettingsChange?: (next: UiSettings) => void;
+  onPasswordChange?: (next: string) => void;
+  onSessionKeyChange?: (next: string) => void;
+  onConnect?: () => void;
+  onGatewayRefresh?: () => void;
   onRawChange: (next: string) => void;
   onFormModeChange: (mode: "form" | "raw") => void;
   onFormPatch: (path: Array<string | number>, value: unknown) => void;
@@ -435,6 +444,69 @@ export function renderConfig(props: ConfigProps) {
   const canUpdate = props.connected && !props.applying && !props.updating;
 
   return html`
+    <!-- Gateway Access section (connection settings) -->
+    ${
+      props.settings
+        ? html`
+            <div class="card" style="margin-bottom: 18px;">
+              <div class="card-title">Gateway Access</div>
+              <div class="card-sub">Where the dashboard connects and how it authenticates.</div>
+              <div class="form-grid" style="margin-top: 16px;">
+                <label class="field">
+                  <span>WebSocket URL</span>
+                  <input
+                    .value=${props.settings.gatewayUrl}
+                    @input=${(e: Event) => {
+                      const v = (e.target as HTMLInputElement).value;
+                      props.onSettingsChange?.({ ...props.settings!, gatewayUrl: v });
+                    }}
+                    placeholder="ws://100.x.y.z:18789"
+                  />
+                </label>
+                <label class="field">
+                  <span>Gateway Token</span>
+                  <input
+                    .value=${props.settings.token}
+                    @input=${(e: Event) => {
+                      const v = (e.target as HTMLInputElement).value;
+                      props.onSettingsChange?.({ ...props.settings!, token: v });
+                    }}
+                    placeholder="OPENCLAW_GATEWAY_TOKEN"
+                  />
+                </label>
+                <label class="field">
+                  <span>Password (not stored)</span>
+                  <input
+                    type="password"
+                    .value=${props.password ?? ""}
+                    @input=${(e: Event) => {
+                      const v = (e.target as HTMLInputElement).value;
+                      props.onPasswordChange?.(v);
+                    }}
+                    placeholder="system or shared password"
+                  />
+                </label>
+                <label class="field">
+                  <span>Default Session Key</span>
+                  <input
+                    .value=${props.settings.sessionKey}
+                    @input=${(e: Event) => {
+                      const v = (e.target as HTMLInputElement).value;
+                      props.onSessionKeyChange?.(v);
+                    }}
+                  />
+                </label>
+              </div>
+              <div class="row" style="margin-top: 14px;">
+                <button class="btn" @click=${() => props.onConnect?.()}>Connect</button>
+                <button class="btn" @click=${() => props.onGatewayRefresh?.()}>Refresh</button>
+                <span class="muted">Click Connect to apply connection changes.</span>
+              </div>
+            </div>
+          `
+        : nothing
+    }
+
     <div class="config-layout">
       <!-- Sidebar -->
       <aside class="config-sidebar">

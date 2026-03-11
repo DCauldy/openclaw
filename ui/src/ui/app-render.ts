@@ -84,7 +84,7 @@ import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation";
 import { renderInstances } from "./views/instances";
 import { renderLogs } from "./views/logs";
 import { renderNodes } from "./views/nodes";
-import { renderOverview } from "./views/overview";
+import { renderDashboard } from "./views/dashboard";
 import { renderSessions } from "./views/sessions";
 import { renderSkills } from "./views/skills";
 
@@ -233,32 +233,18 @@ export function renderApp(state: AppViewState) {
 
         ${
           state.tab === "overview"
-            ? renderOverview({
+            ? renderDashboard({
                 connected: state.connected,
                 hello: state.hello,
-                settings: state.settings,
-                password: state.password,
-                lastError: state.lastError,
-                presenceCount,
-                sessionsCount,
-                cronEnabled: state.cronStatus?.enabled ?? null,
-                cronNext,
-                lastChannelsRefresh: state.channelsLastSuccess,
-                onSettingsChange: (next) => state.applySettings(next),
-                onPasswordChange: (next) => (state.password = next),
-                onSessionKeyChange: (next) => {
-                  state.sessionKey = next;
-                  state.chatMessage = "";
-                  state.resetToolStream();
-                  state.applySettings({
-                    ...state.settings,
-                    sessionKey: next,
-                    lastActiveSessionKey: next,
-                  });
-                  void state.loadAssistantIdentity();
-                },
-                onConnect: () => state.connect(),
-                onRefresh: () => state.loadOverview(),
+                presenceEntries: state.presenceEntries,
+                sessionsResult: state.sessionsResult,
+                channelsSnapshot: state.channelsSnapshot,
+                cronJobs: state.cronJobs,
+                cronStatus: state.cronStatus,
+                costToday: state.dashboardCostToday,
+                n8nFailures: state.dashboardN8nFailures,
+                lastRefresh: state.dashboardLastRefresh,
+                onRefresh: () => state.loadDashboard(),
               })
             : nothing
         }
@@ -561,6 +547,23 @@ export function renderApp(state: AppViewState) {
                 searchQuery: state.configSearchQuery,
                 activeSection: state.configActiveSection,
                 activeSubsection: state.configActiveSubsection,
+                settings: state.settings,
+                password: state.password,
+                onSettingsChange: (next) => state.applySettings(next),
+                onPasswordChange: (next) => (state.password = next),
+                onSessionKeyChange: (next) => {
+                  state.sessionKey = next;
+                  state.chatMessage = "";
+                  state.resetToolStream();
+                  state.applySettings({
+                    ...state.settings,
+                    sessionKey: next,
+                    lastActiveSessionKey: next,
+                  });
+                  void state.loadAssistantIdentity();
+                },
+                onConnect: () => state.connect(),
+                onGatewayRefresh: () => state.loadOverview(),
                 onRawChange: (next) => {
                   state.configRaw = next;
                 },
