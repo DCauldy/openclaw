@@ -128,8 +128,8 @@ export class MissionControlApp extends LitElement {
     this.client = new GatewayBrowserClient({
       url: settings.gatewayUrl,
       token: settings.token || undefined,
-      clientName: "control",
-      clientVersion: "0",
+      clientName: "openclaw-control-ui",
+      mode: "webchat",
       onHello: (hello) => {
         this.hello = hello;
         this.connected = true;
