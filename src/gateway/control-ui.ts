@@ -338,6 +338,19 @@ export function handleControlUiHttpRequest(
     return true;
   }
 
+  // For extensionless paths (e.g. /mission-control), also try appending .html.
+  if (fileRel && !fileRel.includes(".")) {
+    const htmlFilePath = path.join(root, `${fileRel}.html`);
+    if (
+      htmlFilePath.startsWith(root) &&
+      fs.existsSync(htmlFilePath) &&
+      fs.statSync(htmlFilePath).isFile()
+    ) {
+      serveFile(res, htmlFilePath);
+      return true;
+    }
+  }
+
   // SPA fallback (client-side router): serve index.html for unknown paths.
   const indexPath = path.join(root, "index.html");
   if (fs.existsSync(indexPath)) {

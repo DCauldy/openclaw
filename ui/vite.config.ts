@@ -27,6 +27,12 @@ export default defineConfig(({ command }) => {
       outDir: path.resolve(here, "../dist/control-ui"),
       emptyOutDir: true,
       sourcemap: true,
+      rollupOptions: {
+        input: {
+          main: path.resolve(here, "index.html"),
+          "mission-control": path.resolve(here, "mission-control.html"),
+        },
+      },
     },
     server: {
       host: true,

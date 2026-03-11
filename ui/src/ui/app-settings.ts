@@ -9,7 +9,6 @@ import {
   stopDebugPolling,
 } from "./app-polling";
 import { scheduleChatScroll, scheduleLogsScroll } from "./app-scroll";
-import { loadBoardTasks } from "./controllers/board";
 import { loadChannels } from "./controllers/channels";
 import { loadDashboardData } from "./controllers/dashboard";
 import { loadConfig, loadConfigSchema } from "./controllers/config";
@@ -320,7 +319,6 @@ export async function loadOverview(host: SettingsHost) {
     loadCronStatus(host as unknown as OpenClawApp),
     loadDebug(host as unknown as OpenClawApp),
     loadDashboardData(host as unknown as OpenClawApp),
-    loadBoardTasks(host as unknown as OpenClawApp),
   ]);
 }
 

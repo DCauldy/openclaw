@@ -113,6 +113,14 @@ export function renderOverview(props: OverviewProps) {
   })();
 
   return html`
+    <div class="mc-banner">
+      <div>
+        <div class="mc-banner__title">🎯 Mission Control</div>
+        <div class="mc-banner__sub">Board of Directors, Task Kanban, and KPI overview for your AI agents.</div>
+      </div>
+      <a href="./mission-control" class="btn primary">Open Mission Control →</a>
+    </div>
+
     <section class="grid grid-cols-2">
       <div class="card">
         <div class="card-title">Gateway Access</div>

@@ -22,12 +22,6 @@ import type { ChatQueueItem, CronFormState } from "./ui-types";
 import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
 import { refreshChatAvatar } from "./app-chat";
 import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers";
-import {
-  createBoardTask,
-  deleteBoardTask,
-  initializeDirectors,
-  updateBoardTask,
-} from "./controllers/board";
 import { loadChannels } from "./controllers/channels";
 import { loadChatHistory } from "./controllers/chat";
 import {
@@ -90,7 +84,7 @@ import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation";
 import { renderInstances } from "./views/instances";
 import { renderLogs } from "./views/logs";
 import { renderNodes } from "./views/nodes";
-import { renderDashboard } from "./views/dashboard";
+import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
 import { renderSkills } from "./views/skills";
 
@@ -239,28 +233,22 @@ export function renderApp(state: AppViewState) {
 
         ${
           state.tab === "overview"
-            ? renderDashboard({
+            ? renderOverview({
                 connected: state.connected,
                 hello: state.hello,
-                presenceEntries: state.presenceEntries,
-                sessionsResult: state.sessionsResult,
-                agentsList: state.agentsList,
-                channelsSnapshot: state.channelsSnapshot,
-                cronJobs: state.cronJobs,
-                cronStatus: state.cronStatus,
-                costToday: state.dashboardCostToday,
-                n8nFailures: state.dashboardN8nFailures,
-                lastRefresh: state.dashboardLastRefresh,
-                boardTasks: state.boardTasks,
-                boardTasksLoading: state.boardTasksLoading,
-                onRefresh: () => state.loadDashboard(),
-                onTaskCreate: (params) => void createBoardTask(state, params),
-                onTaskUpdate: (id, patch) => void updateBoardTask(state, id, patch),
-                onTaskDelete: (id) => void deleteBoardTask(state, id),
-                onInitDirectors: () => void initializeDirectors(state),
-                onBoardStateChange: () => {
-                  state.boardTasks = state.boardTasks ? [...state.boardTasks] : [];
-                },
+                settings: state.settings,
+                password: state.password,
+                lastError: state.lastError,
+                presenceCount: state.presenceEntries.length,
+                sessionsCount: state.sessionsResult?.count ?? null,
+                cronEnabled: state.cronStatus?.enabled ?? null,
+                cronNext: state.cronStatus?.nextWakeAtMs ?? null,
+                lastChannelsRefresh: state.channelsLastSuccess,
+                onSettingsChange: (next) => state.applySettings(next),
+                onPasswordChange: (next) => state.setPassword(next),
+                onSessionKeyChange: (next) => state.setSessionKey(next),
+                onConnect: () => state.connect(),
+                onRefresh: () => void state.loadOverview(),
               })
             : nothing
         }
