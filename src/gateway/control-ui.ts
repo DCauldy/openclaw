@@ -389,9 +389,9 @@ export async function handleControlUiApiRequest(
   const apiPath = pathname.slice(apiPrefix.length - 1); // starts with /
 
   if (apiPath === "/dashboard/n8n-failures") {
-    const apiKey = process.env.AIRTABLE_API_KEY;
+    const apiKey = process.env.AIRTABLE_API_TOKEN ?? process.env.AIRTABLE_API_KEY;
     if (!apiKey) {
-      sendJson(res, 503, { error: "AIRTABLE_API_KEY not configured on gateway" });
+      sendJson(res, 503, { error: "AIRTABLE_API_TOKEN not configured on gateway" });
       return true;
     }
 
