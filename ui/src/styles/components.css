@@ -2701,3 +2701,122 @@ mission-control-app {
     align-items: flex-start;
   }
 }
+
+/* ===========================================
+   Kanban — task header row + dispatch button
+   =========================================== */
+
+.kanban-task__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.kanban-task__header .kanban-task__title {
+  flex: 1;
+}
+
+.kanban-task__header .kanban-task__assignee {
+  font-size: 14px;
+  line-height: 1;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* Dispatch / Run button */
+.kanban-dispatch-btn {
+  background: rgba(34, 211, 165, 0.12);
+  border: 1px solid rgba(34, 211, 165, 0.3);
+  border-radius: 4px;
+  color: #22d3a5;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.kanban-dispatch-btn:hover:not(:disabled) {
+  background: rgba(34, 211, 165, 0.22);
+  border-color: rgba(34, 211, 165, 0.55);
+}
+
+.kanban-dispatch-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.kanban-dispatch-btn--sent {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #8b5cf6;
+}
+
+:root[data-theme="light"] .kanban-dispatch-btn {
+  background: rgba(34, 211, 165, 0.08);
+  border-color: rgba(34, 211, 165, 0.4);
+}
+
+/* ===========================================
+   Director Picker — chat tab quick-switch bar
+   =========================================== */
+
+.director-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.director-picker__btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px 3px 7px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+  white-space: nowrap;
+}
+
+.director-picker__btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.director-picker__btn--active {
+  background: rgba(34, 211, 165, 0.1);
+  border-color: rgba(34, 211, 165, 0.4);
+  color: #22d3a5;
+}
+
+.director-picker__btn--active:hover {
+  background: rgba(34, 211, 165, 0.18);
+  border-color: rgba(34, 211, 165, 0.6);
+}
+
+.director-picker__emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.director-picker__name {
+  line-height: 1;
+}

@@ -19,6 +19,14 @@ let newTaskVisible = false;
 let newTaskPriority: TaskPriority = "medium";
 let newTaskAgentId = "";
 
+// ---- dispatch helpers ----
+function buildDispatchMessage(task: { title: string; description?: string; tags?: string[] }): string {
+  let msg = `**Task: ${task.title}**`;
+  if (task.description) msg += `\n\n${task.description}`;
+  if (task.tags?.length) msg += `\n\nTags: ${task.tags.join(", ")}`;
+  return msg;
+}
+
 // ---- director status helpers ----
 type DirectorStatus = "active" | "idle" | "offline";
 const ACTIVE_MS = 30 * 60 * 1000;
@@ -119,6 +127,8 @@ export class MissionControlApp extends LitElement {
   @state() private costToday: number | null = null;
   @state() private lastError: string | null = null;
   @state() private loading = true;
+  @state() private dispatchingTaskIds = new Set<string>();
+  @state() private dispatchedTaskIds = new Set<string>();
 
   private client: GatewayBrowserClient | null = null;
 
@@ -247,6 +257,35 @@ export class MissionControlApp extends LitElement {
       }
     } catch (err) {
       this.lastError = String(err);
+    }
+  }
+
+  private async taskDispatch(task: BoardTask) {
+    if (!this.client || !task.assignedAgentId) return;
+    const sessionKey = `agent:${task.assignedAgentId}:main`;
+    const message = buildDispatchMessage(task);
+    const idempotencyKey = `dispatch-${task.id}-${Date.now()}`;
+    this.dispatchingTaskIds = new Set([...this.dispatchingTaskIds, task.id]);
+    try {
+      await this.client.request("chat.send", {
+        sessionKey,
+        message,
+        idempotencyKey,
+        deliver: true,
+      });
+      // Move task to active if it's in backlog
+      if (task.status === "backlog") {
+        await this.taskUpdate(task.id, { status: "active" });
+      }
+      this.dispatchedTaskIds = new Set([...this.dispatchedTaskIds, task.id]);
+      // Clear "dispatched" indicator after 3s
+      setTimeout(() => {
+        this.dispatchedTaskIds = new Set([...this.dispatchedTaskIds].filter((id) => id !== task.id));
+      }, 3000);
+    } catch (err) {
+      this.lastError = `Dispatch failed: ${String(err)}`;
+    } finally {
+      this.dispatchingTaskIds = new Set([...this.dispatchingTaskIds].filter((id) => id !== task.id));
     }
   }
 
@@ -476,16 +515,28 @@ export class MissionControlApp extends LitElement {
                   ${colTasks.map((task) => {
                     const prev = prevStatus(task.status);
                     const next = nextStatus(task.status);
+                    const isDispatching = this.dispatchingTaskIds.has(task.id);
+                    const wasDispatched = this.dispatchedTaskIds.has(task.id);
                     return html`
                       <div
                         class="kanban-task"
                         style="border-left-color: ${priorityBorderColor(task.priority)};"
                       >
-                        <div class="kanban-task__title">${task.title}</div>
-                        ${task.assignedAgentId
-                          ? html`<div class="kanban-task__assignee">${emojiForAgent(task.assignedAgentId)}</div>`
-                          : nothing}
+                        <div class="kanban-task__header">
+                          <div class="kanban-task__title">${task.title}</div>
+                          ${task.assignedAgentId
+                            ? html`<div class="kanban-task__assignee" title="${DIRECTORS.find((d) => d.id === task.assignedAgentId)?.name ?? task.assignedAgentId}">${emojiForAgent(task.assignedAgentId)}</div>`
+                            : nothing}
+                        </div>
                         <div class="kanban-task__actions">
+                          ${task.assignedAgentId && task.status !== "done"
+                            ? html`<button
+                                class="kanban-dispatch-btn ${wasDispatched ? "kanban-dispatch-btn--sent" : ""}"
+                                title="Dispatch to ${DIRECTORS.find((d) => d.id === task.assignedAgentId)?.name ?? task.assignedAgentId}"
+                                ?disabled=${isDispatching}
+                                @click=${() => void this.taskDispatch(task)}
+                              >${isDispatching ? "…" : wasDispatched ? "✓ Sent" : "▶ Run"}</button>`
+                            : nothing}
                           ${prev
                             ? html`<button
                                 class="kanban-move-btn"

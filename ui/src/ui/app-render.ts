@@ -21,6 +21,7 @@ import type {
 import type { ChatQueueItem, CronFormState } from "./ui-types";
 import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
 import { refreshChatAvatar } from "./app-chat";
+import { DIRECTORS } from "./controllers/board";
 import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers";
 import { loadChannels } from "./controllers/channels";
 import { loadChatHistory } from "./controllers/chat";
@@ -457,7 +458,41 @@ export function renderApp(state: AppViewState) {
 
         ${
           state.tab === "chat"
-            ? renderChat({
+            ? html`
+                <div class="director-picker">
+                  ${DIRECTORS.map((d) => {
+                    const sessionKey = `agent:${d.id}:main`;
+                    const isActive = state.sessionKey === sessionKey;
+                    return html`<button
+                      class="director-picker__btn ${isActive ? "director-picker__btn--active" : ""}"
+                      title="Chat with ${d.name}"
+                      @click=${() => {
+                        if (state.sessionKey === sessionKey) return;
+                        state.sessionKey = sessionKey;
+                        state.chatMessage = "";
+                        state.chatAttachments = [];
+                        state.chatStream = null;
+                        state.chatStreamStartedAt = null;
+                        state.chatRunId = null;
+                        state.chatQueue = [];
+                        state.resetToolStream();
+                        state.resetChatScroll();
+                        state.applySettings({
+                          ...state.settings,
+                          sessionKey,
+                          lastActiveSessionKey: sessionKey,
+                        });
+                        void state.loadAssistantIdentity();
+                        void loadChatHistory(state);
+                        void refreshChatAvatar(state);
+                      }}
+                    >
+                      <span class="director-picker__emoji">${d.emoji}</span>
+                      <span class="director-picker__name">${d.name.replace(" Director", "").replace(" Advisor", "")}</span>
+                    </button>`;
+                  })}
+                </div>
+                ${renderChat({
                 sessionKey: state.sessionKey,
                 onSessionKeyChange: (next) => {
                   state.sessionKey = next;
@@ -526,8 +561,9 @@ export function renderApp(state: AppViewState) {
                 onSplitRatioChange: (ratio: number) => state.handleSplitRatioChange(ratio),
                 assistantName: state.assistantName,
                 assistantAvatar: state.assistantAvatar,
-              })
-            : nothing
+              })}
+            `
+          : nothing
         }
 
         ${
